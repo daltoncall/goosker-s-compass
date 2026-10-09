@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "gooskers_compass",
+  "version": "${version}",
+  "name": "Goosker's Compass",
+  "description": "A medieval horizontal compass HUD with Xaero, Waystones, XMXW and spawn/death waypoint support.",
+  "authors": ["Dalton Call / Goosker"],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/gooskers_compass/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["com.goosker.compass.GooskersCompass"],
+    "client": ["com.goosker.compass.client.GooskersCompassClient"],
+    "modmenu": ["com.goosker.compass.client.config.GooskersCompassModMenu"]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.10",
+    "fabric-api": "*",
+    "minecraft": "~1.20.1",
+    "java": ">=17"
+  },
+  "suggests": {
+    "modmenu": "*",
+    "xaerominimap": "*",
+    "xaeroworldmap": "*",
+    "waystones": "*",
+    "xmxw": "*",
+    "server_waypoint": "*",
+    "forgottengraves": "*"
+  }
+}
