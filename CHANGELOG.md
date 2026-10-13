@@ -1,5 +1,18 @@
 # Changelog
 
+## beta-1.1.13
+
+- Added distance-based opacity fading for all compass marker icons.
+- Waypoint, Waystone, and server-waypoint markers default to 90% opacity at 250 blocks, 80% at 500 blocks, and fully fade at 2,500 blocks.
+- Spawn and death markers use a longer 10,000-block fade-out distance.
+- Added configurable fade-distance and fade-strength controls for both marker groups.
+- Added a live compass preview to the config screen so HUD changes can be viewed without closing Mod Menu.
+- Spawn markers are allowed beyond the normal waypoint range so the longer persistent fade can work.
+
+## beta-1.1.12
+
+- Marker icons now render above N / E / S / W and heading ticks, so letters cleanly disappear behind overlapping markers.
+
 ## 0.1.11
 
 - Replaced both compass end-cap textures with the final user-authored 19x19 cap artwork.

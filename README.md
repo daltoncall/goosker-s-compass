@@ -16,6 +16,9 @@ A Fabric 1.20.1 horizontal compass HUD for Goosker's Medieval Modpack. It uses M
 - Optional Forgotten Graves compatibility: a death marker disappears after the loaded grave is recovered
 - Bed/custom respawn marker synced from the server; default world spawn is intentionally ignored
 - Horizontal and vertical marker range filters
+- Distance-based marker fading with separate waypoint and spawn/death distances and strengths
+- Live compass preview in the Mod Menu config screen while adjusting settings
+- Marker icons render above the N / E / S / W letters and heading ticks
 - Custom 19x19 compass end-cap textures
 - Full-width configurable translucent compass background
 - Mod Menu configuration screen
@@ -24,7 +27,9 @@ A Fabric 1.20.1 horizontal compass HUD for Goosker's Medieval Modpack. It uses M
 
 ## Defaults
 
-- Waypoint range: 500 blocks horizontally
+- Waypoint fade-out distance: 2,500 blocks (90% at 250, 80% at 500 with default strength)
+- Spawn/death fade-out distance: 10,000 blocks
+- Waypoint range: automatically at least the waypoint fade-out distance
 - Vertical range: 100 blocks
 - Death markers: 3 most recent
 - Deaths ignore normal distance limits: enabled

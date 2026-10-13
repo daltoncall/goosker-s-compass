@@ -4,6 +4,7 @@ import com.goosker.compass.GooskersCompass;
 import com.goosker.compass.client.config.CompassConfig;
 import com.goosker.compass.client.config.ConfigManager;
 import com.goosker.compass.network.SpawnState;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
@@ -38,14 +39,10 @@ public final class CompassHudRenderer {
     public static void render(DrawContext context, float tickDelta) {
         MinecraftClient client = MinecraftClient.getInstance();
         ClientPlayerEntity player = client.player;
-        if (player == null || client.world == null || client.options.hudHidden) {
-            return;
-        }
+        if (player == null || client.world == null || client.options.hudHidden) return;
 
         CompassConfig config = ConfigManager.get();
-        if (!config.enabled || (config.hideWithDebugHud && client.options.debugEnabled)) {
-            return;
-        }
+        if (!config.enabled || (config.hideWithDebugHud && client.options.debugEnabled)) return;
 
         float scale = (float) config.hudScale;
         context.getMatrices().push();
@@ -63,9 +60,7 @@ public final class CompassHudRenderer {
 
             List<VisibleMarker> visible = collectVisibleMarkers(player, yaw, centerX, width, config);
             visible.sort(Comparator.comparingInt(v -> v.marker.type().priority()));
-            for (VisibleMarker marker : visible) {
-                drawMarker(context, marker, y);
-            }
+            for (VisibleMarker marker : visible) drawMarker(context, marker, y);
             drawFocusedLabel(context, client.textRenderer, visible, centerX, y, config);
         } finally {
             context.getMatrices().pop();
@@ -83,21 +78,18 @@ public final class CompassHudRenderer {
         int inner = 0x80464B50;
         int arrow = 0xD09AA0A6;
 
-        // Full-width translucent background and frame lines.
         context.fill(left, top, left + width, bottom, bg);
         context.fill(left, top, left + width, top + 1, edge);
         context.fill(left, bottom - 1, left + width, bottom, edge);
         context.fill(left, top + 2, left + width, top + 3, inner);
         context.fill(left, bottom - 3, left + width, bottom - 2, inner);
 
-        // Authored 19x19 end caps. Their transparent edges overlap the frame cleanly.
         int capY = y + 4;
         context.drawTexture(CAP_LEFT, left - CAP_SIZE, capY, 0.0f, 0.0f,
                 CAP_SIZE, CAP_SIZE, CAP_SIZE, CAP_SIZE);
         context.drawTexture(CAP_RIGHT, left + width, capY, 0.0f, 0.0f,
                 CAP_SIZE, CAP_SIZE, CAP_SIZE, CAP_SIZE);
 
-        // Downward-pointing center marker. No lower tail pixels.
         int center = left + width / 2;
         context.fill(center - 3, top - 4, center + 4, top - 3, arrow);
         context.fill(center - 2, top - 3, center + 3, top - 2, arrow);
@@ -113,8 +105,6 @@ public final class CompassHudRenderer {
             for (int heading = -180; heading < 180; heading += 15) {
                 double rel = wrapDegrees(heading - yaw);
                 if (Math.abs(rel) > halfSpan) continue;
-
-                // Keep the cardinal letters clean: no tick directly behind N/E/S/W.
                 if (config.showCardinals && Math.floorMod(heading, 90) == 0) continue;
 
                 int x = angleToX(rel, centerX, width, halfSpan);
@@ -147,8 +137,6 @@ public final class CompassHudRenderer {
         String currentDimension = player.getWorld().getRegistryKey().getValue().toString();
         List<CompassMarker> candidates = new ArrayList<>(MarkerManager.markers());
 
-        // Only a player-selected respawn point counts. The server sync deliberately
-        // never falls back to the world's default spawn, so new players see no bed icon.
         if (config.showSpawn && SpawnState.hasCustomSpawn()) {
             BlockPos spawn = SpawnState.position();
             String spawnDimension = SpawnState.dimensionId();
@@ -175,7 +163,9 @@ public final class CompassHudRenderer {
             double dz = marker.z() + 0.5 - player.getZ();
             double horizontalDistance = Math.sqrt(dx * dx + dz * dz);
             double verticalDistance = Math.abs(marker.y() + 0.5 - player.getY());
+
             boolean ignoreRange = marker.type() == MarkerType.DEATH && config.deathsIgnoreRange;
+            if (marker.type() == MarkerType.SPAWN) ignoreRange = true;
             if (!ignoreRange && (horizontalDistance > config.horizontalRange || verticalDistance > config.verticalRange)) {
                 continue;
             }
@@ -200,21 +190,44 @@ public final class CompassHudRenderer {
         };
     }
 
+    private static float markerAlpha(MarkerType type, double distance, CompassConfig config) {
+        boolean persistent = type == MarkerType.SPAWN || type == MarkerType.DEATH;
+        double fadeDistance = persistent ? config.persistentFadeDistance : config.markerFadeDistance;
+        double strength = persistent ? config.persistentFadeStrength : config.markerFadeStrength;
+
+        if (distance >= fadeDistance) return 0.0f;
+        if (distance <= 0.0) return 1.0f;
+        double normalized = distance / fadeDistance;
+        if (strength <= 0.0) return 1.0f;
+        return (float) Math.pow(1.0 - normalized, strength);
+    }
+
     private static void drawMarker(DrawContext context, VisibleMarker visible, int y) {
-        CompassMarker marker = visible.marker;
-        if (marker.type() == MarkerType.DEATH && !shouldRenderDeathMarker(marker)) {
-            return;
+        context.getMatrices().push();
+        // Markers render above cardinals/ticks so N/E/S/W disappear behind them cleanly.
+        context.getMatrices().translate(0.0, 0.0, 100.0);
+        try {
+            CompassMarker marker = visible.marker;
+            if (marker.type() == MarkerType.DEATH && !shouldRenderDeathMarker(marker)) return;
+
+            float alpha = markerAlpha(marker.type(), visible.distance, ConfigManager.get());
+            if (alpha <= 0.001f) return;
+
+            Identifier texture = switch (marker.type()) {
+                case NORMAL, SERVER -> ICON_WAYPOINT;
+                case WAYSTONE -> ICON_WAYSTONE;
+                case SPAWN -> ICON_SPAWN;
+                case DEATH -> pickDeathIcon(marker);
+            };
+
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, alpha);
+            context.drawTexture(texture, visible.x - ICON_SIZE / 2, y + 1, 0.0f, 0.0f,
+                    ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE);
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+        } finally {
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+            context.getMatrices().pop();
         }
-
-        Identifier texture = switch (marker.type()) {
-            case NORMAL, SERVER -> ICON_WAYPOINT;
-            case WAYSTONE -> ICON_WAYSTONE;
-            case SPAWN -> ICON_SPAWN;
-            case DEATH -> pickDeathIcon(marker);
-        };
-
-        context.drawTexture(texture, visible.x - ICON_SIZE / 2, y + 1, 0.0f, 0.0f,
-                ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE);
     }
 
     private static Identifier pickDeathIcon(CompassMarker marker) {
@@ -232,7 +245,6 @@ public final class CompassHudRenderer {
         int visibleDeathCount = Math.min(totalDeaths, configuredLimit);
         if (visibleDeathCount <= 1) return ICON_DEATH;
 
-        // Split the configured visible death list into thirds by age.
         int bucket = (newerDeaths * 3) / visibleDeathCount;
         if (bucket <= 0) return ICON_DEATH;
         if (bucket == 1) return ICON_DEATH_DECAYED;
@@ -240,26 +252,16 @@ public final class CompassHudRenderer {
     }
 
     private static boolean shouldRenderDeathMarker(CompassMarker marker) {
-        if (!FabricLoader.getInstance().isModLoaded("forgottengraves")) {
-            return true;
-        }
+        if (!FabricLoader.getInstance().isModLoaded("forgottengraves")) return true;
 
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.world == null) return true;
 
         BlockPos pos = new BlockPos(marker.x(), marker.y(), marker.z());
-
-        // If the grave chunk is not loaded yet, keep the marker rather than guessing.
-        if (!client.world.isChunkLoaded(pos)) {
-            return true;
-        }
+        if (!client.world.isChunkLoaded(pos)) return true;
 
         BlockEntity blockEntity = client.world.getBlockEntity(pos);
-        if (blockEntity == null) {
-            return false;
-        }
-
-        // No hard compile/runtime dependency on Forgotten Graves classes.
+        if (blockEntity == null) return false;
         return FORGOTTEN_GRAVES_BLOCK_ENTITY.equals(blockEntity.getClass().getName());
     }
 
@@ -282,15 +284,58 @@ public final class CompassHudRenderer {
                 case NORMAL -> "Waypoint";
             };
         }
-        if (config.showDistances) {
-            label += "  " + Math.round(focused.distance) + "m";
-        }
+        if (config.showDistances) label += "  " + Math.round(focused.distance) + "m";
+
         int maxWidth = 230;
         if (textRenderer.getWidth(label) > maxWidth) {
             label = textRenderer.trimToWidth(label, maxWidth - textRenderer.getWidth("…")) + "…";
         }
         int textWidth = textRenderer.getWidth(label);
         context.drawTextWithShadow(textRenderer, Text.literal(label), centerX - textWidth / 2, y + 26, 0xFFE5E5E5);
+    }
+
+    private static void drawPreviewIcon(DrawContext context, Identifier texture, int x, int y, float alpha) {
+        if (alpha <= 0.001f) return;
+        context.getMatrices().push();
+        context.getMatrices().translate(0.0, 0.0, 100.0);
+        try {
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, alpha);
+            context.drawTexture(texture, x - ICON_SIZE / 2, y + 1, 0.0f, 0.0f,
+                    ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE);
+        } finally {
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+            context.getMatrices().pop();
+        }
+    }
+
+    public static void renderConfigPreview(DrawContext context, TextRenderer textRenderer, CompassConfig config,
+                                           int screenWidth, int screenHeight) {
+        if (screenHeight < 300) return;
+
+        float scale = (float) config.hudScale;
+        context.getMatrices().push();
+        context.getMatrices().scale(scale, scale, 1.0f);
+        try {
+            int scaledWidth = Math.round(screenWidth / scale);
+            int width = Math.min(config.hudWidth, Math.max(140, scaledWidth - 80));
+            int centerX = scaledWidth / 2;
+            int y = Math.round((screenHeight - 78) / scale);
+
+            context.drawCenteredTextWithShadow(textRenderer, Text.literal("Live preview"), centerX, y - 12, 0xA0A0A0);
+            drawFrame(context, centerX - width / 2, y, width, config);
+            drawHeading(context, textRenderer, centerX, centerX - width / 2, y, width, 0.0f, config);
+
+            drawPreviewIcon(context, ICON_WAYPOINT, centerX - width * 3 / 10, y,
+                    markerAlpha(MarkerType.NORMAL, 500.0, config));
+            drawPreviewIcon(context, ICON_WAYSTONE, centerX - width / 10, y,
+                    markerAlpha(MarkerType.WAYSTONE, 1500.0, config));
+            drawPreviewIcon(context, ICON_DEATH, centerX + width / 10, y,
+                    markerAlpha(MarkerType.DEATH, 5000.0, config));
+            drawPreviewIcon(context, ICON_SPAWN, centerX + width * 3 / 10, y,
+                    markerAlpha(MarkerType.SPAWN, 7500.0, config));
+        } finally {
+            context.getMatrices().pop();
+        }
     }
 
     private static int angleToX(double relative, int centerX, int width, double halfSpan) {

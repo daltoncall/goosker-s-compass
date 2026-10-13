@@ -25,6 +25,13 @@ public final class CompassConfig {
     public boolean showCardinals = true;
     public boolean hideWithDebugHud = false;
 
+    // Distance fading. Normal/server/Waystone markers use markerFadeDistance.
+    // Spawn and death use the longer persistentFadeDistance.
+    public int markerFadeDistance = 2500;
+    public int persistentFadeDistance = 10000;
+    public double markerFadeStrength = 1.0;
+    public double persistentFadeStrength = 1.0;
+
     public void sanitize() {
         hudScale = clamp(hudScale, 0.5, 2.0);
         hudY = clamp(hudY, 0, 180);
@@ -34,6 +41,13 @@ public final class CompassConfig {
         horizontalRange = clamp(horizontalRange, 50, 5000);
         verticalRange = clamp(verticalRange, 10, 1000);
         deathCount = clamp(deathCount, 0, 20);
+        markerFadeDistance = clamp(markerFadeDistance, 250, 5000);
+        persistentFadeDistance = clamp(persistentFadeDistance, 1000, 20000);
+        markerFadeStrength = clamp(markerFadeStrength, 0.0, 1.0);
+        persistentFadeStrength = clamp(persistentFadeStrength, 0.0, 1.0);
+
+        // Normal markers must remain eligible for collection until they have fully faded.
+        horizontalRange = Math.max(horizontalRange, markerFadeDistance);
     }
 
     public CompassConfig copy() {
@@ -58,6 +72,10 @@ public final class CompassConfig {
         c.showTicks = showTicks;
         c.showCardinals = showCardinals;
         c.hideWithDebugHud = hideWithDebugHud;
+        c.markerFadeDistance = markerFadeDistance;
+        c.persistentFadeDistance = persistentFadeDistance;
+        c.markerFadeStrength = markerFadeStrength;
+        c.persistentFadeStrength = persistentFadeStrength;
         return c;
     }
 
