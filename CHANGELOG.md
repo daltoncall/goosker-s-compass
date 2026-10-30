@@ -1,3 +1,8 @@
+## beta-1.1.14
+- Optional vertical boss-bar relocation below the compass (includes boss-bar title).
+- New Layout page in Mod Menu: adjustable boss-bar gap (0–80 px), with live compass and boss-bar preview.
+- Preserve default behavior with the toggle disabled. No marker or texture changes.
+
 # Changelog
 
 ## beta-1.1.13

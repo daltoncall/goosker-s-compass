@@ -32,6 +32,10 @@ public final class CompassConfig {
     public double markerFadeStrength = 1.0;
     public double persistentFadeStrength = 1.0;
 
+    // Shift the complete vanilla boss-bar overlay below the compass.
+    public boolean bossBarsBelowCompass = true;
+    public int bossBarGap = 10;
+
     public void sanitize() {
         hudScale = clamp(hudScale, 0.5, 2.0);
         hudY = clamp(hudY, 0, 180);
@@ -44,6 +48,7 @@ public final class CompassConfig {
         markerFadeDistance = clamp(markerFadeDistance, 250, 5000);
         persistentFadeDistance = clamp(persistentFadeDistance, 1000, 20000);
         markerFadeStrength = clamp(markerFadeStrength, 0.0, 1.0);
+        bossBarGap = clamp(bossBarGap, 0, 80);
         persistentFadeStrength = clamp(persistentFadeStrength, 0.0, 1.0);
 
         // Normal markers must remain eligible for collection until they have fully faded.
@@ -76,6 +81,8 @@ public final class CompassConfig {
         c.persistentFadeDistance = persistentFadeDistance;
         c.markerFadeStrength = markerFadeStrength;
         c.persistentFadeStrength = persistentFadeStrength;
+        c.bossBarsBelowCompass = bossBarsBelowCompass;
+        c.bossBarGap = bossBarGap;
         return c;
     }
 

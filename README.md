@@ -79,3 +79,7 @@ Forgotten Graves compatibility is client-side and optional. If a death/grave pos
 `config/gooskers-compass.json`
 
 Or use **Mods -> Goosker's Compass -> Configure** with Mod Menu installed.
+
+### Boss-bar layout (beta-1.1.14)
+
+Under **Mod Menu → Goosker's Compass → Layout**, enable **Boss bars below compass** (on by default) and choose the gap in pixels. The layout page previews a sample Ender Dragon bar below the compass. This moves the entire vanilla boss-bar overlay, including its title, and does not alter boss mechanics.

@@ -51,7 +51,7 @@ public final class CompassConfigScreen extends Screen {
             y += row;
             addSlider(left, y, columnWidth, "Bar opacity", 0.15, 1.0, working.backgroundOpacity, 2,
                     v -> working.backgroundOpacity = v);
-        } else {
+        } else if (page == 1) {
             addToggle(left, y, columnWidth, "Xaero waypoints", () -> working.showNormalWaypoints, v -> working.showNormalWaypoints = v);
             addToggle(right, y, columnWidth, "Activated Waystones", () -> working.showWaystones, v -> working.showWaystones = v);
             y += row;
@@ -81,11 +81,24 @@ public final class CompassConfigScreen extends Screen {
             addIntSlider(right, y, columnWidth, "Spawn/death fade strength", 0, 100,
                     (int) Math.round(working.persistentFadeStrength * 100.0),
                     v -> working.persistentFadeStrength = v / 100.0, "%");
+        } else {
+            addToggle(left, y, columnWidth, "Boss bars below compass", () -> working.bossBarsBelowCompass,
+                    v -> working.bossBarsBelowCompass = v);
+            y += row;
+            addIntSlider(left, y, columnWidth, "Boss-bar gap", 0, 80, working.bossBarGap,
+                    v -> working.bossBarGap = v, " px");
+            addIntSlider(right, y, columnWidth, "Compass top offset", 0, 180, working.hudY,
+                    v -> working.hudY = v, " px");
+            y += row;
+            addSlider(left, y, columnWidth, "HUD scale", 0.5, 2.0, working.hudScale, 2,
+                    v -> working.hudScale = v);
+            addToggle(right, y, columnWidth, "Show marker label", () -> working.showLabels,
+                    v -> working.showLabels = v);
         }
 
         int bottom = height - 28;
-        addDrawableChild(ButtonWidget.builder(Text.literal(page == 0 ? "Markers >" : "< HUD"), b -> {
-            page = page == 0 ? 1 : 0;
+        addDrawableChild(ButtonWidget.builder(Text.literal(page == 0 ? "Markers >" : page == 1 ? "Layout >" : "< HUD"), b -> {
+            page = (page + 1) % 3;
             clearAndInit();
         }).dimensions(width / 2 - 154, bottom, 100, 20).build());
 
@@ -121,12 +134,40 @@ public final class CompassConfigScreen extends Screen {
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         renderBackground(context);
         context.drawCenteredTextWithShadow(textRenderer, title, width / 2, 14, 0xFFFFFF);
-        context.drawCenteredTextWithShadow(textRenderer, Text.literal(page == 0 ? "HUD" : "Markers"), width / 2, 29, 0xA0A0A0);
+        context.drawCenteredTextWithShadow(textRenderer, Text.literal(page == 0 ? "HUD" : page == 1 ? "Markers" : "Layout"), width / 2, 29, 0xA0A0A0);
 
-        // Live preview remains visible while sliders/toggles are being changed.
-        CompassHudRenderer.renderConfigPreview(context, textRenderer, working, width, height);
+        // Render the real compass preview on all pages; the layout page also shows a
+        // simulated boss bar with the same relative spacing used in-game.
+        if (page == 2 && height >= 300) {
+            context.getMatrices().push();
+            context.getMatrices().translate(0, -65, 0);
+            try {
+                CompassHudRenderer.renderConfigPreview(context, textRenderer, working, width, height);
+            } finally {
+                context.getMatrices().pop();
+            }
+            drawBossBarPreview(context);
+        } else {
+            CompassHudRenderer.renderConfigPreview(context, textRenderer, working, width, height);
+        }
 
         super.render(context, mouseX, mouseY, delta);
+    }
+
+    /** A self-contained preview of the vanilla boss-bar title and bar. */
+    private void drawBossBarPreview(DrawContext context) {
+        int compassTop = height - 143;
+        int compassBottom = compassTop + (int) Math.ceil(
+                (working.showLabels ? 36 : 23) * working.hudScale);
+        int nameY = working.bossBarsBelowCompass
+                ? compassBottom + working.bossBarGap
+                : compassTop - 5;
+        int centerX = width / 2;
+        Text name = Text.literal("Ender Dragon");
+        context.drawCenteredTextWithShadow(textRenderer, name, centerX, nameY, 0xFFFFFF);
+        int barY = nameY + 10;
+        context.fill(centerX - 91, barY, centerX + 91, barY + 5, 0xFF222222);
+        context.fill(centerX - 90, barY + 1, centerX + 90, barY + 4, 0xFF9B32C8);
     }
 
     @Override

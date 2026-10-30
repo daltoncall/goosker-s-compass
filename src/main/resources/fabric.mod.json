@@ -4,15 +4,23 @@
   "version": "${version}",
   "name": "Goosker's Compass",
   "description": "A medieval horizontal compass HUD with Xaero, Waystones, XMXW and spawn/death waypoint support.",
-  "authors": ["Dalton Call / Goosker"],
+  "authors": [
+    "Dalton Call / Goosker"
+  ],
   "contact": {},
   "license": "MIT",
   "icon": "assets/gooskers_compass/icon.png",
   "environment": "*",
   "entrypoints": {
-    "main": ["com.goosker.compass.GooskersCompass"],
-    "client": ["com.goosker.compass.client.GooskersCompassClient"],
-    "modmenu": ["com.goosker.compass.client.config.GooskersCompassModMenu"]
+    "main": [
+      "com.goosker.compass.GooskersCompass"
+    ],
+    "client": [
+      "com.goosker.compass.client.GooskersCompassClient"
+    ],
+    "modmenu": [
+      "com.goosker.compass.client.config.GooskersCompassModMenu"
+    ]
   },
   "depends": {
     "fabricloader": ">=0.16.10",
@@ -28,5 +36,8 @@
     "xmxw": "*",
     "server_waypoint": "*",
     "forgottengraves": "*"
-  }
+  },
+  "mixins": [
+    "gooskers_compass.mixins.json"
+  ]
 }
