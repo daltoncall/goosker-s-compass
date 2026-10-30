@@ -37,6 +37,8 @@ A Fabric 1.20.1 horizontal compass HUD for Goosker's Medieval Modpack. It uses M
 
 ## Build
 
+The GitHub Actions build validates the boss-bar mixin metadata before publishing the artifact.
+
 Requires Java 17.
 
 Windows:

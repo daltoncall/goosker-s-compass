@@ -1,3 +1,8 @@
+## beta-1.1.15
+- Fix startup crash caused by an incorrectly packaged boss-bar mixin annotation in the downloadable JAR.
+- No changes to compass behavior, marker handling, HUD textures, or boss-bar layout settings.
+- Add a GitHub Actions mixin metadata validation step.
+
 ## beta-1.1.14
 - Optional vertical boss-bar relocation below the compass (includes boss-bar title).
 - New Layout page in Mod Menu: adjustable boss-bar gap (0–80 px), with live compass and boss-bar preview.
