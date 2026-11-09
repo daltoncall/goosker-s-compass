@@ -252,17 +252,7 @@ public final class CompassHudRenderer {
     }
 
     private static boolean shouldRenderDeathMarker(CompassMarker marker) {
-        if (!FabricLoader.getInstance().isModLoaded("forgottengraves")) return true;
-
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (client.world == null) return true;
-
-        BlockPos pos = new BlockPos(marker.x(), marker.y(), marker.z());
-        if (!client.world.isChunkLoaded(pos)) return true;
-
-        BlockEntity blockEntity = client.world.getBlockEntity(pos);
-        if (blockEntity == null) return false;
-        return FORGOTTEN_GRAVES_BLOCK_ENTITY.equals(blockEntity.getClass().getName());
+        return DeathWaypointCache.shouldRenderDeathMarker(marker);
     }
 
     private static void drawFocusedLabel(DrawContext context, TextRenderer textRenderer, List<VisibleMarker> visible,

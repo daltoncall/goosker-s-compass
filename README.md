@@ -12,6 +12,7 @@ A Fabric 1.20.1 horizontal compass HUD for Goosker's Medieval Modpack. It uses M
 - Server Waypoint support using the normal waypoint icon
 - User-authored 20x20 marker assets for waypoint, Waystone, death, and spawn
 - Three age-based death-marker stages: normal, decayed, fully decayed
+- Per-world, on-disk cache of death waypoint coordinates: going beyond the 10,000-block fade distance does not discard a known death; the icon reappears when you return within the fade distance
 - Death-stage thresholds scale automatically with the configured recent-death count
 - Optional Forgotten Graves compatibility: a death marker disappears after the loaded grave is recovered
 - Bed/custom respawn marker synced from the server; default world spawn is intentionally ignored
@@ -74,7 +75,9 @@ Optional integrations:
 
 The bed/spawn indicator requires Goosker's Compass on the server as well as the client. It only appears after the player explicitly sets a respawn point; vanilla's default world spawn is intentionally ignored. The compass itself and client-side waypoint integrations still work without server installation.
 
-Forgotten Graves compatibility is client-side and optional. If a death/grave position is in a loaded chunk and the Forgotten Graves grave block entity is gone, the compass death marker is hidden. Unloaded grave chunks keep their marker until the client can verify the grave state.
+Forgotten Graves compatibility is client-side and optional. Xaero's death location may differ from the grave's placement location, so the mod looks for a grave block entity in nearby **already loaded** chunks. It hides a cached death marker only when a grave that was previously observed has subsequently disappeared. A missing grave *at the precise death coordinate* alone is not proof it was recovered. No additional chunks are loaded.
+
+Death waypoint cache files are stored in `config/gooskers-compass/death-cache/`, separated by a hashed world/server identity. When Goosker's Modpack Utility's persistent e4mc Xaero world-ID feature is enabled on both sides, the cache follows that stable identity across changing e4mc addresses. Otherwise it uses the actual multiplayer address to prevent mixing unrelated worlds. Xaero must supply a death waypoint at least once **after this version is installed** for it to be cached; the mod does not guess which older Xaero folders belong to the same world. The 10,000-block fade distance is still purely visual and can be adjusted in Mod Menu.
 
 ## Config
 

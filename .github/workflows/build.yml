@@ -20,6 +20,8 @@ jobs:
         run: gradle build
       - name: Check boss-bar mixin metadata
         run: python3 scripts/check_mixin_metadata.py
+      - name: Check persistent death waypoint cache
+        run: python3 scripts/check_death_cache.py
       - uses: actions/upload-artifact@v4
         with:
           name: gooskers-compass

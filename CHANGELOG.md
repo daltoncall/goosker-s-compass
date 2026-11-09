@@ -1,3 +1,9 @@
+## beta-1.1.16
+- Cache death waypoints per identified world on disk independent of 10,000-block fade distance; returning near a distant death makes it eligible to appear again.
+- Maintain separate death caches for different servers/worlds. Honor the Utility mod's persistent e4mc world ID when available.
+- Do not suppress a death marker merely because a Forgotten Graves block entity is not exactly at the Xaero waypoint coordinates. Check nearby loaded chunks, and only hide after an observed grave is subsequently removed.
+- No changes to compass artwork, other marker types, fade settings, or boss-bar layout.
+
 ## beta-1.1.15
 - Fix startup crash caused by an incorrectly packaged boss-bar mixin annotation in the downloadable JAR.
 - No changes to compass behavior, marker handling, HUD textures, or boss-bar layout settings.

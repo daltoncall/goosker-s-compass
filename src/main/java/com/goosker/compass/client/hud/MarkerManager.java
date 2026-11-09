@@ -53,6 +53,6 @@ public final class MarkerManager {
             if (dedupe.add(marker.dedupeKey())) result.add(marker);
         }
 
-        cached = List.copyOf(result);
+        cached = DeathWaypointCache.merge(result);
     }
 }
