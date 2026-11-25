@@ -1,3 +1,17 @@
+# beta-1.1.18
+
+- Added HUD setting "Hide with Tab (Player List)", enabled by default, including for existing configs.
+- Hides the compass while the Player List key is held (including rebound keys) and restores normal boss-bar placement while hidden.
+
+## beta-1.1.17
+- Record deaths every client tick independently of Xaero and compass visibility.
+- Recover the server-synchronized vanilla last-death position on reconnect.
+- Bind the cache to a stable world identity for the whole connection; use the save path for singleplayer and migrate the previous cache.
+- Keep death points regardless of missing graves, chunk reloads, or old inferred recovery flags.
+- Apply death count and age icons per dimension, retaining the configured appearance, ranges, and fading.
+- Save newly discovered deaths immediately with atomic replacement; retry failed saves on refresh.
+- Add disk-backed regression checks for dimension travel, reconnects, world isolation, duplicate sources, repeated deaths, and legacy cache migration.
+
 ## beta-1.1.16
 - Cache death waypoints per identified world on disk independent of 10,000-block fade distance; returning near a distant death makes it eligible to appear again.
 - Maintain separate death caches for different servers/worlds. Honor the Utility mod's persistent e4mc world ID when available.

@@ -51,6 +51,8 @@ public final class CompassConfigScreen extends Screen {
             y += row;
             addSlider(left, y, columnWidth, "Bar opacity", 0.15, 1.0, working.backgroundOpacity, 2,
                     v -> working.backgroundOpacity = v);
+            addToggle(right, y, columnWidth, "Hide with Tab (Player List)",
+                    () -> working.hideWithPlayerList, v -> working.hideWithPlayerList = v);
         } else if (page == 1) {
             addToggle(left, y, columnWidth, "Xaero waypoints", () -> working.showNormalWaypoints, v -> working.showNormalWaypoints = v);
             addToggle(right, y, columnWidth, "Activated Waystones", () -> working.showWaystones, v -> working.showWaystones = v);

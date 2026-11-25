@@ -15,7 +15,8 @@ public final class BossBarPositioning {
         }
         CompassConfig config = ConfigManager.get();
         if (!config.enabled || !config.bossBarsBelowCompass ||
-                (config.hideWithDebugHud && client.options.debugEnabled)) {
+                (config.hideWithDebugHud && client.options.debugEnabled) ||
+                (config.hideWithPlayerList && client.options.playerListKey.isPressed())) {
             return 0;
         }
         // Vanilla boss-bar title starts at y=3. The compass caps end at y+23,

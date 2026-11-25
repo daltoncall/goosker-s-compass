@@ -17,6 +17,7 @@ public final class MarkerManager {
     private MarkerManager() {}
 
     public static void tick(MinecraftClient client) {
+        DeathTracker.tick(client);
         if (client.player == null || client.world == null) {
             clear();
             return;

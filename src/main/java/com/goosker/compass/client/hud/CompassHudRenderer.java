@@ -42,7 +42,8 @@ public final class CompassHudRenderer {
         if (player == null || client.world == null || client.options.hudHidden) return;
 
         CompassConfig config = ConfigManager.get();
-        if (!config.enabled || (config.hideWithDebugHud && client.options.debugEnabled)) return;
+        if (!config.enabled || (config.hideWithDebugHud && client.options.debugEnabled) ||
+                (config.hideWithPlayerList && client.options.playerListKey.isPressed())) return;
 
         float scale = (float) config.hudScale;
         context.getMatrices().push();
@@ -148,6 +149,7 @@ public final class CompassHudRenderer {
 
         List<CompassMarker> deaths = candidates.stream()
                 .filter(m -> m.type() == MarkerType.DEATH)
+                .filter(m -> currentDimension.equals(m.dimensionId()))
                 .sorted(Comparator.comparingLong(CompassMarker::createdAt).reversed())
                 .limit(config.deathCount)
                 .toList();
@@ -238,6 +240,7 @@ public final class CompassHudRenderer {
 
         for (CompassMarker candidate : MarkerManager.markers()) {
             if (candidate.type() != MarkerType.DEATH) continue;
+            if (!marker.dimensionId().equals(candidate.dimensionId())) continue;
             totalDeaths++;
             if (candidate.createdAt() > createdAt) newerDeaths++;
         }

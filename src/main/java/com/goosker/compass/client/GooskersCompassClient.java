@@ -3,6 +3,7 @@ package com.goosker.compass.client;
 import com.goosker.compass.client.config.ConfigManager;
 import com.goosker.compass.client.hud.CompassHudRenderer;
 import com.goosker.compass.client.hud.MarkerManager;
+import com.goosker.compass.client.hud.DeathTracker;
 import com.goosker.compass.network.SpawnState;
 import com.goosker.compass.network.SpawnSyncServer;
 import net.fabricmc.api.ClientModInitializer;
@@ -31,6 +32,7 @@ public final class GooskersCompassClient implements ClientModInitializer {
         });
 
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            DeathTracker.disconnect();
             SpawnState.clear();
             MarkerManager.clear();
         });

@@ -14,7 +14,9 @@ A Fabric 1.20.1 horizontal compass HUD for Goosker's Medieval Modpack. It uses M
 - Three age-based death-marker stages: normal, decayed, fully decayed
 - Per-world, on-disk cache of death waypoint coordinates: going beyond the 10,000-block fade distance does not discard a known death; the icon reappears when you return within the fade distance
 - Death-stage thresholds scale automatically with the configured recent-death count
-- Optional Forgotten Graves compatibility: a death marker disappears after the loaded grave is recovered
+- Deaths are captured directly and recovered from Minecraft’s last-death position, even without Xaero
+- Dimension travel, missing graves, and reconnects never automatically dismiss death markers
+- Recent-death limits and icon stages apply separately within each dimension
 - Bed/custom respawn marker synced from the server; default world spawn is intentionally ignored
 - Horizontal and vertical marker range filters
 - Distance-based marker fading with separate waypoint and spawn/death distances and strengths
@@ -22,6 +24,7 @@ A Fabric 1.20.1 horizontal compass HUD for Goosker's Medieval Modpack. It uses M
 - Marker icons render above the N / E / S / W letters and heading ticks
 - Custom 19x19 compass end-cap textures
 - Full-width configurable translucent compass background
+- HUD toggle "Hide with Tab (Player List)" (enabled by default)
 - Mod Menu configuration screen
 - Configurable HUD width, position, scale, opacity, compass span, ranges, marker categories, labels, distances, and death count
 - Reflection/optional-integration design: Xaero, Waystones, XMXW, Server Waypoint, and Forgotten Graves are not bundled

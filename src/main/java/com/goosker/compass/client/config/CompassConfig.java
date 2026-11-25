@@ -24,6 +24,7 @@ public final class CompassConfig {
     public boolean showTicks = true;
     public boolean showCardinals = true;
     public boolean hideWithDebugHud = false;
+    public boolean hideWithPlayerList = true;
 
     // Distance fading. Normal/server/Waystone markers use markerFadeDistance.
     // Spawn and death use the longer persistentFadeDistance.
@@ -77,6 +78,7 @@ public final class CompassConfig {
         c.showTicks = showTicks;
         c.showCardinals = showCardinals;
         c.hideWithDebugHud = hideWithDebugHud;
+        c.hideWithPlayerList = hideWithPlayerList;
         c.markerFadeDistance = markerFadeDistance;
         c.persistentFadeDistance = persistentFadeDistance;
         c.markerFadeStrength = markerFadeStrength;
